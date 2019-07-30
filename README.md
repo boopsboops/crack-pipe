@@ -18,7 +18,11 @@ The programs all need to be on your $PATH, meaning that a program can be run in 
 
 1. Obtain these scripts by either cloning this git repository, or using the [download link above](https://github.com/boopsboops/crack-pipe/archive/master.zip).
 
-2. Run `./prepare.sh` to create all the necessary subdirectories.   
+2. Run a script to create all the necessary subdirectories:
+
+```
+./prepare.sh
+```
 
 3. Put your raw R1 and R2 metabarcoding reads (FASTQ format) into `temp/fastq`.  
 4. Put your sample barcodes (FASTA format) into `temp/fastq/barcodes.fas`. These barcodes should be 10 bp in length, and therefore will contain your 7/8 bp tag, plus two or three bases of your forward PCR primer to anchor the barcode. The FASTA header will contain your sample identification codes, like so:
