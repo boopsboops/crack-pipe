@@ -42,10 +42,10 @@ CACCGCGGTTAAACGAGAGGCCCTAGTTGATATTACTACGGCGTAAAGGGT
 
 ## Step 3: Merge your reads
 
-First processing step is to merge the reads by running command below in the terminal (open at the root of this project directory). The -f and -r arguments are the locations of your raw R1 and R2 reads respectively.
+First processing step is to merge the reads by running command below in the terminal (open at the root of this project directory). The -f and -r arguments are the locations of your raw R1 and R2 reads respectively. The -t argument is the number of processor cores of your machine. If in doubt, set to four.
 
 ```
-./merge-reads.sh -f temp/fastq/your-reads.R1.fastq.gz -r temp/fastq/your-reads.R2.fastq.gz
+./merge-reads.sh -t 8 -f temp/fastq/your-reads.R1.fastq.gz -r temp/fastq/your-reads.R2.fastq.gz
 ```
 
 
@@ -84,10 +84,10 @@ This step creates files named `temp/filtered/*.fasta` and `temp/dereplicated/*.f
 
 ## Step 7: Cluster your reads
 
-This step performs several functions. First it merges all the samples and dereplicates again globally. Next, it clusters the sequences into biologically useful groups using the Swarm algorithm. This collapses most of the Illumina sequencing and PCR errors. Next, it removes sequences that could be chimaeric, i.e. partial sequences grafted together due to PCR or library prep errors. Next, it performs a quality filter; here, the -n and -x arguments are respectively the minimum and maximum sequence lengths allowed, and -u is the minimum adundance of a sequence, i.e. sequences with less than n total representatives are removed, because they likely to be spurious sequences. These values are good starting point, but change as appropriate for your data.
+This step performs several functions. First it merges all the samples and dereplicates again globally. Next, it clusters the sequences into biologically useful groups using the Swarm algorithm. This collapses most of the Illumina sequencing and PCR errors. Next, it removes sequences that could be chimaeric, i.e. partial sequences grafted together due to PCR or library prep errors. Next, it performs a quality filter; here, the -n and -x arguments are respectively the minimum and maximum sequence lengths allowed, and -u is the minimum adundance of a sequence, i.e. sequences with less than n total representatives are removed, because they likely to be spurious sequences. These values are good starting point, but change as appropriate for your data. The -t argument is the number of processor cores of your machine. If in doubt, set to four.
 
 ```
-./cluster.sh -n 145 -x 196 -u 5
+./cluster.sh -t 8 -n 145 -x 196 -u 5
 ```
 
 This step creates files named `results/cleaned.reads.fasta` and `temp/clustered/swarm.clusters.tsv`.
@@ -106,10 +106,10 @@ Step creates files `results/cleaned-reads.fasta` and `temp/clustered/swarm.clust
 
 ## Step 9: Assign taxonomy
 
-This step assigns taxonomy to your cleaned reads using the custom reference library and an annotated NCBI REFSEQ mitochondrial DNA database of 4,571 sequences. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data.
+This step assigns taxonomy to your cleaned reads using the custom reference library and an annotated NCBI REFSEQ mitochondrial DNA database of 4,571 sequences. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data. The -t argument is the number of processor cores of your machine. If in doubt, set to four.
 
 ```
-./assign-taxonomy.sh -c 0.7
+./assign-taxonomy.sh -t 8 -c 0.7
 ```
 
 This step creates files named `results/reference-library.fasta` and `results/taxonomy-assignments.tsv`.
@@ -128,7 +128,7 @@ This step creates files named `results/otu-table-raw.csv` (table with md5sums th
 
 ## Step 11: Pipeline statistics
 
-Once last step. This generates stats for the numbers of reads at each stage. The -f argument is the path to your raw R1 reads file. This enables you to track your losses of reads at each step.
+One last step. This generates stats for the numbers of reads at each stage. The -f argument is the path to your raw R1 reads file. This enables you to track your losses of reads at each step.
 
 ```
 ./generate-stats.sh -f temp/fastq/your-reads.R1.fastq.gz

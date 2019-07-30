@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
 
 # set params #
-while getopts n:x:u: option
+while getopts t:n:x:u: option
 do
 case "${option}"
 in
 n) MINLEN=${OPTARG};;
 x) MAXLEN=${OPTARG};;
 u) UNIQS=${OPTARG};;
+t) THREADS=${OPTARG};;
 esac
 done
 
@@ -18,7 +19,7 @@ cat temp/dereplicated/*.fasta > temp/clustered/combined.derep.fasta
 vsearch --derep_fulllength temp/clustered/combined.derep.fasta --sizein --sizeout --fasta_width 0 --output temp/clustered/combined.glob.derep.fasta
 
 # swarm
-swarm -t 4 -d 1 -z -f -o temp/clustered/swarm.clusters.out -w temp/clustered/swarm.clusters.fasta temp/clustered/combined.glob.derep.fasta
+swarm -t "$THREADS" -d 1 -z -f -o temp/clustered/swarm.clusters.out -w temp/clustered/swarm.clusters.fasta temp/clustered/combined.glob.derep.fasta
 
 # Sort representatives
 vsearch --fasta_width 0 --sortbysize temp/clustered/swarm.clusters.fasta --output temp/clustered/swarm.clusters.sorted.fasta

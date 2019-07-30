@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
 
 # set params #
-while getopts c: option
+while getopts t:c: option
 do
 case "${option}"
 in
 c) CUTOFF=${OPTARG};;
+t) THREADS=${OPTARG};;
 esac
 done
 
@@ -16,4 +17,4 @@ cutadapt -n 1 -e 0.3 -O 10 -g GTCGGTAAAACTCGTGCCAGC temp/reference-library/custo
 cat temp/reference-library/custom-references-annotated.trimmed.fasta assets/refseq-mtdna-with-taxonomy.fasta > results/reference-library.fasta
 
 # run sintax
-vsearch --threads 4 --sintax results/cleaned-reads.fasta --db results/reference-library.fasta --sintax_cutoff "$CUTOFF" --tabbedout results/taxonomy-assignments.tsv
+vsearch --threads "$THREADS" --sintax results/cleaned-reads.fasta --db results/reference-library.fasta --sintax_cutoff "$CUTOFF" --tabbedout results/taxonomy-assignments.tsv
