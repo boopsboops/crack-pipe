@@ -10,19 +10,22 @@ data(fishbase)
 custom.refs <- read.FASTA(file="temp/reference-library/custom-references.fasta")
 
 # get unique names
-custom.df <- tibble(code=str_split_fixed(names(custom.refs),"\\|",2)[,1],sciName=str_split_fixed(names(custom.refs),"\\|",2)[,2])
+custom.df <- tibble(code=str_split_fixed(names(custom.refs),"\\|",2)[,1],sciName=str_split_fixed(names(custom.refs),"\\|",2)[,2]) %>%
+    mutate(Genus=str_split_fixed(sciName," ",2)[,1])
 
 # add full sci name to fishbase
-fishbase %<>% mutate(sciName=paste(Genus,Species))
+#fishbase %<>% mutate(sciName=paste(Genus,Species))
 
 # check names validity
-print("Following species not in FishBase. Spelling error, or maybe a synonym?")
-setdiff(unique(pull(custom.df,sciName)),fishbase$sciName)
-fishbase %<>% filter(sciName %in% unique(pull(custom.df,sciName)))
+print("Following genera are not in FishBase db. Spelling error, or maybe a try a synonym?")
+setdiff(unique(pull(custom.df,Genus)),fishbase$Genus)
+fishbase %<>% filter(Genus %in% unique(pull(custom.df,Genus)))
 #rfishbase::synonyms(setdiff(names.unique,fishbase$sciName))
 
 # make taxonomy
-fishbase %<>% mutate(kingdom="Animalia",phylum="Chordata") %>% select(kingdom,phylum,Class,Order,Family,Genus,sciName)
+fishbase %<>% mutate(kingdom="Animalia",phylum="Chordata") %>% 
+    select(kingdom,phylum,Class,Order,Family,Genus) %>% 
+    distinct()
 
 # combine
 custom.df <- suppressMessages(left_join(custom.df, fishbase)) %>% 
