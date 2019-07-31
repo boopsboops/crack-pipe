@@ -9,27 +9,27 @@ esac
 done
 
 echo "Total number raw reads:"
-fqtools count "$R1"
+seqkit stats -b "$R1"
 echo ""
 
 echo "Total number merged reads:"
-fqtools count temp/merged/reads.assembled.fastq.gz
+seqkit stats -b temp/merged/reads.assembled.fastq.gz
 echo ""
 
 echo "Total number reorientated reads:"
-fqtools count temp/reorientated/reorientated.fastq.gz
+seqkit stats -b temp/reorientated/reorientated.fastq.gz
 echo ""
 
 echo "Total number demultiplexed reads:"
-cat temp/demultiplexed/*.fastq.gz | fqtools count
+cat temp/demultiplexed/*.fastq.gz | seqkit stats
 echo ""
 
 echo "Total number trimmed reads:"
-cat temp/trimmed/*.fastq.gz | fqtools count
+cat temp/trimmed/*.fastq.gz | seqkit stats
 echo ""
 
 echo "Total number filtered reads:"
-cat temp/filtered/*.fasta | grep -c  ">"
+cat temp/filtered/*.fasta | seqkit stats
 echo ""
 
 echo "Total number cleaned reads"
