@@ -6,15 +6,15 @@
 
 ./reorientate.sh -f GTCGGTAAAACTCGTGCCAGC -r CATAGTGGGGTATCTAATCCCAGTTTG -m 21 -n 27
 
-./demultiplex2.sh -t 8 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
+./demultiplex.sh -t 8 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
 
-./dereplicate.sh
+./dereplicate.sh -a 170 -p 0.15 -e 0.5
 
-./cluster.sh -t 8 -n 145 -x 196 -u 5
+./cluster.sh -t 8 -u 0.000005
 
 ./annotate-taxonomy.R
 
-./assign-taxonomy.sh -t 8 -c 0.7
+./assign-taxonomy.sh -t 8 -a 170 -p 0.7 -c 0.7
 
 ./make-otu-tables.R
 
@@ -24,6 +24,15 @@
 # seqkit sample -n 1000000 -s 42 -o 12S-mifishu-benchmark-R2.fastq.gz 12S-mifishu-R2.fastq.gz
 # rm -r temp/
 
+# rm -r temp/clustered temp/demultiplexed temp/dereplicated temp/filtered temp/merged temp/reorientated temp/trash temp/trimmed
+# ./prepare.sh
+
 # run 
 # time ./benchmark.sh
-# real	3m5.273s 
+# real	2m9.759s
+
+# MIYA
+#FWD="GTCGGTAAAACTCGTGCCAGC"
+#REV="CATAGTGGGGTATCTAATCCCAGTTTG"
+#REVCOMP="CAAACTGGGATTAGATACCCCACTATG"
+#MINLEN="21"

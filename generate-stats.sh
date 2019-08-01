@@ -8,36 +8,36 @@ f) R1=${OPTARG};;
 esac
 done
 
-echo "Total number raw reads:"
+printf "Total number raw reads:\n"
 seqkit stats -b "$R1"
-echo ""
+printf "\n\n"
 
-echo "Total number merged reads:"
-seqkit stats -b temp/merged/reads.assembled.fastq.gz
-echo ""
+printf "Total number merged reads:\n"
+seqkit stats -b temp/merged/merged.fastq.gz
+printf "\n\n"
 
-echo "Total number reorientated reads:"
+printf "Total number reorientated reads:\n"
 seqkit stats -b temp/reorientated/reorientated.fastq.gz
-echo ""
+printf "\n\n"
 
-echo "Total number demultiplexed reads:"
+printf "Total number demultiplexed reads:\n"
 cat temp/demultiplexed/*.fastq.gz | seqkit stats
-echo ""
+printf "\n\n"
 
-echo "Total number trimmed reads:"
+printf "Total number trimmed reads:\n"
 cat temp/trimmed/*.fastq.gz | seqkit stats
-echo ""
+printf "\n\n"
 
-echo "Total number filtered reads:"
+printf "Total number filtered reads:\n"
 cat temp/filtered/*.fasta | seqkit stats
-echo ""
+printf "\n\n"
 
-echo "Total number cleaned reads"
+printf "Total number cleaned reads:\n"
 grep ";size=" results/cleaned-reads.fasta | sed -e 's/.*;size=//g' | awk '{ SUM += $1} END { print SUM }'
-echo ""
+printf "\n\n"
 
-echo "Total number fish reads:"
+printf "Total number fish reads:\n"
 cat temp/reference-library/nfishreads.txt
-echo ""
+printf "\n\n"
 
 # ./generate-stats.sh -f temp/fastq/12S-mifishu-R1.fastq.gz

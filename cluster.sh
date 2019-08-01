@@ -1,13 +1,11 @@
 #!/usr/bin/env sh
 
 # set params #
-while getopts t:n:x:u: option
+while getopts t:u: option
 do
 case "${option}"
 in
-n) MINLEN=${OPTARG};;
-x) MAXLEN=${OPTARG};;
-u) UNIQS=${OPTARG};;
+u) UNIQPROP=${OPTARG};;
 t) THREADS=${OPTARG};;
 esac
 done
@@ -27,8 +25,12 @@ vsearch --fasta_width 0 --sortbysize temp/clustered/swarm.clusters.fasta --outpu
 # chimaera search
 vsearch --fasta_width 0 --uchime_denovo temp/clustered/swarm.clusters.sorted.fasta --uchimeout temp/clustered/swarm.cleaned.uchime --nonchimeras temp/clustered/swarm.cleaned.fasta
 
-# remove singletons and length filter at approx 15% of read avg length
-vsearch --derep_fulllength temp/clustered/swarm.cleaned.fasta --sizein --sizeout --fasta_width 0 --minuniquesize "$UNIQS" --maxseqlength "$MAXLEN" --minseqlength "$MINLEN" --output results/cleaned-reads.fasta
+# get nreads
+NREADS=$(grep ";size=" temp/clustered/swarm.cleaned.fasta | sed -e 's/.*;size=//g' | awk '{ SUM += $1} END { print SUM }')
+DISCARD=$(awk "function ceil(x, y){y=int(x); return(x>y?y+1:y)} BEGIN { pc=${NREADS}*${UNIQPROP}; i=ceil(pc); print i }")
+
+# remove ntons
+vsearch --derep_fulllength temp/clustered/swarm.cleaned.fasta --sizein --sizeout --fasta_width 0 --minuniquesize "$DISCARD" --output results/cleaned-reads.fasta
 
 # homology search
 #hmmsearch -E 0.01 --incE 0.01 hmms/12s.miya.primers.hmm temp/clustered/swarm.cleaned.rmsingletons.fasta | grep ">> " | sed -e 's/>> //g' -e 's/[[:space:]]//g' | sort | uniq > temp/clustered/hmm-out.txt
@@ -36,4 +38,7 @@ vsearch --derep_fulllength temp/clustered/swarm.cleaned.fasta --sizein --sizeout
 
 sed -e 's/;size=[0-9]*//g' temp/clustered/swarm.clusters.out > temp/clustered/swarm.clusters.tsv
 
-#./cluster.sh -n 145 -x 196 -u 5
+# report
+printf "...\n...\n...\nSequences with fewer than $DISCARD reads have been discarded\n"
+
+#./cluster.sh -t 8 -u 5

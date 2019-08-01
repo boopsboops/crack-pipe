@@ -17,7 +17,7 @@ custom.df <- tibble(code=str_split_fixed(names(custom.refs),"\\|",2)[,1],sciName
 #fishbase %<>% mutate(sciName=paste(Genus,Species))
 
 # check names validity
-print("Following genera are not in FishBase db. Spelling error, or maybe a try a synonym?")
+print("Following genera are not in FishBase db. Spelling error, or maybe a try a synonym? 'character(0)' means all genera were found in FishBase.")
 setdiff(unique(pull(custom.df,Genus)),fishbase$Genus)
 fishbase %<>% filter(Genus %in% unique(pull(custom.df,Genus)))
 #rfishbase::synonyms(setdiff(names.unique,fishbase$sciName))
