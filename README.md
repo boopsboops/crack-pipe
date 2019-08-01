@@ -160,7 +160,7 @@ rm -r temp/trimmed #step 5
 rm -r temp/filtered #step 6
 rm -r temp/dereplicated #step 6
 rm -r temp/clustered #step 7
-./prepare.sh # recreate empty dirs
+./prepare.sh #recreate empty dirs
 ```
 
 
