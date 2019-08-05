@@ -84,7 +84,7 @@ This step creates files named `temp/demultiplexed/*.fastq.gz` and `temp/trimmed/
 Reads can now be dereplicated (collapsed into unique sequences) on a per-sample basis. Reads are also quality filtered to remove low quality sequences. The -a argument is the approximate or average length of the expected fragment, minus primers (in this case about 170 bp for the MiFish 12S fragment). The -p argument is the +/- proportion of this average length you are willing to accept as a good quality read. Here we set to 0.15 which means sequences between 145 bp and 196 bp are retained (CAUTION: there may be real sequences in your dataset that lie outside of this range!). The -e argument is a threshold for the number of expected errors in a sequence, so sequences with more than n expected errors are discarded. Low values will result in fewer, but better quality sequences passing filter, and will speed up the analyses.
 
 ```
-./dereplicate.sh -a 170 -p 0.15 -e 0.5
+./dereplicate.sh -a 170 -p 0.15 -e 1
 ```
 
 This step creates files named `temp/filtered/*.fasta` and `temp/dereplicated/*.fasta`.

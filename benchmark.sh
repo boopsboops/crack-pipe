@@ -8,7 +8,7 @@
 
 ./demultiplex.sh -t 8 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
 
-./dereplicate.sh -a 170 -p 0.15 -e 0.5
+./dereplicate.sh -a 170 -p 0.15 -e 1
 
 ./cluster.sh -t 8 -u 0.000005
 
