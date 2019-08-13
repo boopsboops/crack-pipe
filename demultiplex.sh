@@ -31,7 +31,7 @@ cutadapt --no-indels --error-rate 0.1 --overlap 10 --action=none -g file:temp/fa
 done; wait
 
 # now cat all of the files back into the same files - 
-find temp/demultiplexed -type f -name "*.fastq.gz" | while read F; do basename ${F%.fastq.gz}; done | sort | uniq | while read P; do find temp/demultiplexed -type f -name "${P}*.fastq.gz" -exec cat '{}' ';' > temp/demultiplexed/${P}.merged.fastq.gz; done
+find temp/demultiplexed -type f -name "*.fastq.gz" | while read F; do basename ${F%.fastq.gz}; done | sort | uniq | while read P; do find temp/demultiplexed/reorientated* -type f -name "${P}*.fastq.gz" -exec cat '{}' ';' > temp/demultiplexed/${P}.merged.fastq.gz; done
 
 # trim with cutadapt
 FILES="$(ls temp/demultiplexed/*.fastq.gz | sed -e 's/\.fastq\.gz//g' | sed -e 's/temp\/demultiplexed\///g')"
