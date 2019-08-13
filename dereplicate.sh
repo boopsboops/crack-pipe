@@ -15,7 +15,7 @@ MINLEN=$(awk "function ceil(x, y){y=int(x); return(x>y?y+1:y)} BEGIN { pc=${AVG}
 MAXLEN=$(awk "function ceil(x, y){y=int(x); return(x>y?y+1:y)} BEGIN { pc=${AVG}+${AVG}*${PROP}; i=ceil(pc); print i }")
 
 # qc filter
-FILES="$(ls temp/trimmed/*.fastq.gz | sed --expression='s/\.merged\.fastq\.gz//g' | sed --expression='s/temp\/trimmed\///g')"
+FILES="$(ls temp/trimmed/*.fastq.gz | sed -e 's/\.merged\.fastq\.gz//g' | sed -e 's/temp\/trimmed\///g')"
 # check
 #for f in $FILES; do echo "$f"; done
 # now run
@@ -24,7 +24,7 @@ for i in $FILES; do
 done; wait
 
 # derep
-FILES="$(ls temp/filtered/*.fasta | sed --expression='s/\.fasta//g' | sed --expression='s/temp\/filtered\///g')"
+FILES="$(ls temp/filtered/*.fasta | sed -e 's/\.fasta//g' | sed -e 's/temp\/filtered\///g')"
 # check
 #for f in $FILES; do echo "$f"; done
 # now run
@@ -36,4 +36,4 @@ done; wait
 printf "...\nMinimum length of fragment is: $MINLEN bp\n"
 printf "...\nMaximum length of fragment is: $MAXLEN bp\n"
 
-# ./dereplicate.sh -a 170 -p 0.15
+#./dereplicate.sh -a 170 -p 0.15 -e 1
