@@ -70,10 +70,10 @@ This step creates a file named `temp/reorientated/reorientated.fastq.gz`.
 
 ## Step 5: Demultiplex your reads
 
-Now the reads can be demultiplexed by the sample barcodes you put into `temp/fastq/barcodes.fas`. The -f and -r arguments are the forward PCR primer and the reverse complement of the reverse PCR primer, respectively. Change as appropriate for your data. The reads are also trimmed of PCR primers and barcodes in this step.
+Now the reads can be demultiplexed by the sample barcodes you put into `temp/fastq/barcodes.fas`. The -f and -r arguments are the forward PCR primer and the reverse complement of the reverse PCR primer, respectively. Change as appropriate for your data. The -t argument is the number of processor cores on your machine (if in doubt, set to 4). The reads are also trimmed of PCR primers and barcodes in this step.
 
 ```
-./demultiplex.sh -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
+./demultiplex.sh -t 8 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
 ```
 
 This step creates files named `temp/demultiplexed/*.fastq.gz` and `temp/trimmed/*.fastq.gz`.
