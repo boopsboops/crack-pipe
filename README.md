@@ -33,9 +33,9 @@ export PATH=~/Software/swarm/bin:$PATH
 
 ```
 >A01
-CGGAAACGCC
+CGGAAACGTC
 >A02
-TATCATTGCC
+TATCATTGTC
 ```
 
 5. Put your custom reference library (FASTA format) into the `temp/reference-library/custom-references.fasta` file. Your custom reference library should be unaligned sequences containing no Ns, hyphens, or question marks. The FASTA header will contain the tissue identification code separated from the species name by a pipe. Genus and species should be separated by a space. Be sure to remove any trailing whitespace (spaces or tabs) from the ends of the lines. For example:
