@@ -21,7 +21,7 @@ daughters <- mcmapply(function(x) paste(x[-1],collapse=" "), str_split(swarms," 
 
 # make a nested table of daughters and then flatten
 daughters.unlist <- mcmapply(function(x) unlist(str_split(x," ",simplify=FALSE)), daughters, mc.cores=4, USE.NAMES=FALSE)
-all.swarms <- tibble(mother=mothers, daughter=daughters.unlist) %>% unnest()
+all.swarms <- tibble(mother=mothers, daughter=daughters.unlist) %>% unnest(cols=c(daughter))
 
 # collapse and join by sample
 samples.merged <- samples.tabulated.joined %>% 
