@@ -5,8 +5,9 @@ suppressMessages(library("tidyverse"))
 suppressMessages(library("parallel"))
 suppressMessages(library("magrittr"))
 
-# read in refs
+# read in refs and remove duplicates
 custom.refs <- read.FASTA(file="temp/reference-library/custom-references.fasta")
+custom.refs <- custom.refs[!duplicated(str_split_fixed(names(custom.refs),"\\|",2)[,1])]
 
 # make df of names
 custom.df <- tibble(code=str_split_fixed(names(custom.refs),"\\|",2)[,1],sciName=str_split_fixed(names(custom.refs),"\\|",2)[,2]) %>%
