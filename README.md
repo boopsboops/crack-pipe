@@ -9,7 +9,7 @@
 
 The following programs need to be installed on your machine: [cutadapt](https://cutadapt.readthedocs.io/en/stable/index.html), [vsearch](https://github.com/torognes/vsearch), [swarm](https://github.com/torognes/swarm), [seqkit](https://github.com/shenwei356/seqkit) and [R](https://cran.r-project.org/). 
 
-For R, you will also need the packages: 'tidyverse', 'ape', 'rfishbase', 'magrittr', 'taxize', and 'parallel'.
+For R, you will also need the packages: 'tidyverse', 'ape', 'rfishbase', 'magrittr', and 'parallel'.
 
 The programs all need to be on your $PATH, meaning that a program can be run in any directory, just by typing its name into the terminal (e.g. 'vsearch -h'). See [here](https://opensource.com/article/17/6/set-path-linux) for a better explanation. Effectively, this means putting a line of code at the bottom of your terminal session startup scripts pointing to wherever you compiled the programs, assuming you didn't make them with sudo. The startup scripts are in `~/.bashrc` (Ubuntu) and `~/.bash_profile` (Mac). The dot before the name means they are hidden files. For example, add:
 
