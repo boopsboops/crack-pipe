@@ -9,7 +9,7 @@
 
 The following programs need to be installed on your machine: [cutadapt](https://cutadapt.readthedocs.io/en/stable/index.html), [vsearch](https://github.com/torognes/vsearch), [swarm](https://github.com/torognes/swarm), [seqkit](https://github.com/shenwei356/seqkit), [blast+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and [R](https://cran.r-project.org/). 
 
-For R, you will also need the packages: 'tidyverse', 'ape', 'rfishbase', 'magrittr', and 'parallel'.
+For R, you will also need the packages: 'tidyverse', 'ape', 'rfishbase', 'magrittr', 'parallel', and ['lulu'](https://github.com/tobiasgf/lulu) (optional).
 
 The programs all need to be on your $PATH, meaning that a program can be run in any directory, just by typing its name into the terminal (e.g. 'vsearch -h'). See [here](https://opensource.com/article/17/6/set-path-linux) for a better explanation. Effectively, this means putting a line of code at the bottom of your terminal session startup scripts pointing to wherever you compiled the programs, assuming you didn't make them with sudo. The startup scripts are in `~/.bashrc` (Ubuntu) and `~/.bash_profile` (Mac). The dot before the name means they are hidden files. For example, add:
 
@@ -116,7 +116,7 @@ Step creates the file `temp/reference-library/custom-references-annotated.fasta`
 
 This step assigns taxonomy to your cleaned reads using the custom reference library and an annotated NCBI REFSEQ mitochondrial DNA database of 4,571 sequences. 
 
-The -t argument is the number of processor cores of your machine (if in doubt, set to 4). The -a argument is the approximate or average length of the fragment minus primers (in this case about 170 bp for the MiFish 12S fragment). The -p argument is the proportion of the average length you are willing to accept as a valid reference sequence. Here we set to 0.7 which is 119 bp. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data. 
+The -t argument is the number of processor cores of your machine (if in doubt, set to 4). The -a argument is the approximate or average length of the fragment minus primers (in this case about 170 bp for the MiFish 12S fragment). The -p argument is the proportion of the average length you are willing to accept as a valid reference sequence. Here we set to 0.7 which is 119 bp. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data. The function also runs a blast analysis.
 
 ```
 ./assign-taxonomy.sh -t 8 -a 170 -p 0.7 -c 0.7
@@ -133,7 +133,13 @@ This step creates your OTU tables, which are the basis for further analyses.
 ./make-otu-tables.R
 ```
 
-This step creates files named `results/otu-table-raw.csv` (table with md5sums), `results/otu-table-all.csv` (all named taxa, including unassigned), and `results/otu-table-fish.csv` (only reads identified as fishes). To get the sequence for a named taxon to check the identification using BLAST for example, find the name of the taxon in `results/taxonomy-assignments.tsv`, and then search for the md5sum in `results/cleaned-reads.fasta`.
+This step creates files named `results/otu-table-raw.csv` (table with md5sums), `results/otu-table-all.csv` (all named taxa, including unassigned), and `results/otu-table-fish.csv` (only reads identified as fishes). The file `results/taxonomy-assignments.tsv` contains all OTU names and their best taxonomic assignment, along with blastn percent identity, match length, and best scoring blastn hit(s). This information is also added to the OTU table in `results/otu-table-raw-annotated.csv` To obtain the DNA sequence of each OTU, search for the md5sum in `results/cleaned-reads.fasta`.
+
+Optionally you can also run OTU-table post-processing with lulu, which will collapse PCR errors and reduce the number of spurious 'shadow' OTUs. Check results with care as it may also collapse real interspecific variation. This creates a file named `results/otu-table-raw-annotated-lulu.csv`.
+
+```
+./lulu.sh
+```
 
 
 ## Step 11: Pipeline statistics
