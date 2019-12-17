@@ -22,7 +22,23 @@ cutadapt -n 1 -e 0.2 -O 10 -g GTCGGTAAAACTCGTGCCAGC temp/reference-library/custo
 cat temp/reference-library/custom-references-annotated.trimmed.fasta assets/refseq-mtdna-with-taxonomy.fasta > results/reference-library.fasta
 
 # run sintax
-vsearch --threads "$THREADS" --sintax results/cleaned-reads.fasta --db results/reference-library.fasta --sintax_cutoff "$CUTOFF" --tabbedout results/taxonomy-assignments.tsv
+vsearch --threads "$THREADS" --sintax results/cleaned-reads.fasta --db results/reference-library.fasta --sintax_cutoff "$CUTOFF" --tabbedout temp/blast-dump/sintax-output.tsv
+
+# report
+printf "...\n...\n...\nNow running BLAST\n..."
+
+# run BLAST 
+# make blast db (only need to do this step once)
+makeblastdb -in temp/reference-library/references-blast.fasta -parse_seqids -dbtype nucl -blastdb_version 5
+
+# get better hits with smaller word size
+blastn -task blastn -num_threads 4 -evalue 1000 -word_size 7 -max_target_seqs 500 -db temp/reference-library/references-blast.fasta -outfmt "6 qseqid sseqid evalue length pident nident score bitscore" -out temp/blast-dump/blast.out -query results/cleaned-reads.fasta
+
+# join the header
+printf "qseqid\tsseqidLocal\tevalueLocal\tlengthLocal\tpidentLocal\tnidentLocal\tscoreLocal\tbitscoreLocal\n" > temp/blast-dump/headers
+cat temp/blast-dump/headers temp/blast-dump/blast.out > temp/blast-dump/blast-result.tsv
+rm temp/blast-dump/blast.out
+rm temp/blast-dump/headers
 
 # report
 printf "...\n...\n...\nMinimum length of fragment is: $MINLEN bp\n"

@@ -13,6 +13,9 @@ custom.refs <- custom.refs[!duplicated(str_split_fixed(names(custom.refs),"\\|",
 custom.df <- tibble(code=str_split_fixed(names(custom.refs),"\\|",2)[,1],sciName=str_split_fixed(names(custom.refs),"\\|",2)[,2]) %>%
     mutate(Genus=str_split_fixed(sciName," ",2)[,1])
 
+# remove dups
+custom.df %<>% distinct(code,.keep_all=TRUE)
+
 # get up to date spp list and taxonomy
 fishbase.species <- rfishbase::species(server="fishbase")
 fishbase.taxonomy <- rfishbase::load_taxa(server="fishbase")
@@ -63,3 +66,20 @@ names(custom.refs.sub) <- pull(custom.df.annotated,label)[match(names(custom.ref
 
 # write out
 write.FASTA(custom.refs.sub,file="temp/reference-library/custom-references-annotated.fasta")
+write_csv(custom.df.annotated,path="temp/reference-library/custom-references-annotated.csv")
+
+# REFSEQ references plain for blast
+refseq.refs <- read.FASTA(file="assets/refseq-mtdna-with-taxonomy.fasta")
+refseq.db <- suppressMessages(suppressWarnings(read_csv("assets/taxonomy-table.csv")))
+
+# get accs match gi replace name
+names(refseq.refs) <- pull(refseq.db,gi)[match(str_split_fixed(names(refseq.refs),";",2)[,1],pull(refseq.db,accession))]
+
+# join with custom
+names(custom.refs.sub) <- str_split_fixed(names(custom.refs.sub),";",2)[,1]
+refs.combined <- c(refseq.refs,custom.refs.sub)
+# remove dups
+refs.combined <- refs.combined[!duplicated(names(refs.combined))]
+
+# write out
+write.FASTA(refs.combined,file="temp/reference-library/references-blast.fasta")

@@ -46,13 +46,48 @@ samples.kept %>% pull(sum) %>% sum == sum(as.numeric(str_replace_all(names(keeps
 samples.kept %>% spread(key=sample,value=sum,fill=0) %>%
     write_csv(path="results/otu-table-raw.csv")
 
-
 # read in taxonomy assignment
-tax.ass.df <- suppressMessages(suppressWarnings(read_tsv(file="results/taxonomy-assignments.tsv",col_names=c("md5","idsProbs","strand","ids"))))
+tax.ass.df <- suppressMessages(suppressWarnings(read_tsv(file="temp/blast-dump/sintax-output.tsv",col_names=c("otu","idsProbs","strand","ids"),guess_max=999999)))
 
 # clean md5 and extract best IDs
-tax.ass.df %<>% mutate(md5=str_replace_all(md5,";size=[0-9]*",""), bestId=str_replace_all(map(str_split(tax.ass.df$ids,":"), last),"_"," ")) %>% 
+tax.ass.df %<>% mutate(md5=str_replace_all(otu,";size=[0-9]*",""), size=as.numeric(str_replace_all(otu,".*;size=","")), bestId=str_replace_all(map(str_split(pull(tax.ass.df,ids),":"), last),"_"," ")) %>% 
     mutate(isFish=if_else(grepl("Cephalaspidomorphi",idsProbs) | grepl("Elasmobranchii",idsProbs) | grepl("Actinopterygii",idsProbs), TRUE, FALSE))
+
+# add BLAST results
+# load blast result
+local.db.blast <- suppressMessages(suppressWarnings(read_tsv("temp/blast-dump/blast-result.tsv",guess_max=999999)))
+
+# add taxonomy
+custom.db <- suppressMessages(suppressWarnings(read_csv("temp/reference-library/custom-references-annotated.csv",guess_max=999999)))
+refseq.db <- suppressMessages(suppressWarnings(read_csv("assets/taxonomy-table.csv")))
+
+custom.db %<>% select(code,sciName) %>% rename(gi=code,species=sciName)
+refseq.db %<>% select(gi,species) %>% mutate(gi=as.character(gi))
+combined.db <- bind_rows(custom.db,refseq.db)
+
+# annotate species names
+local.db.blast %<>% mutate(sciName=pull(combined.db,species)[match(sseqidLocal,pull(combined.db,gi))])
+
+# chose "best" hit based on bitscore
+# also add scinames
+local.db.blast.sorted <- local.db.blast %>% 
+    group_by(qseqid) %>%
+    arrange(desc(bitscoreLocal),.by_group=TRUE) %>%
+    filter(bitscoreLocal==max(bitscoreLocal)) %>%
+    arrange(sciName,.by_group=TRUE) %>%
+    mutate(sciName=paste(unique(sciName),collapse="; ")) %>%
+    slice(1) %>% 
+    ungroup()
+
+# add to results df
+tax.ass.df %<>% mutate(blastId=pull(local.db.blast.sorted,sciName)[match(otu,pull(local.db.blast.sorted,qseqid))],
+    matchLength=pull(local.db.blast.sorted,lengthLocal)[match(otu,pull(local.db.blast.sorted,qseqid))],
+    identity=pull(local.db.blast.sorted,pidentLocal)[match(otu,pull(local.db.blast.sorted,qseqid))]) 
+
+# write out
+tax.ass.df %>% select(md5,size,bestId,matchLength,identity,blastId) %>% 
+    arrange(bestId,desc(size)) %>% 
+    write_csv("results/taxonomy-assignments.tsv")
 
 # match to OTU table
 assigned.all <- samples.kept %>% mutate(assignment=pull(tax.ass.df,bestId)[match(mother,pull(tax.ass.df,md5))]) %>%
