@@ -117,3 +117,14 @@ assigned.all %>%
     pull(sum) %>%
     sum() %>% 
     write("temp/reference-library/nfishreads.txt")
+
+# make an annotated raw table combining assigments
+samples.kept %>% spread(key=sample,value=sum,fill=0) %>% 
+    mutate(size=pull(tax.ass.df,size)[match(mother,pull(tax.ass.df,md5))],
+    bestId=pull(tax.ass.df,bestId)[match(mother,pull(tax.ass.df,md5))],
+    matchLength=pull(tax.ass.df,matchLength)[match(mother,pull(tax.ass.df,md5))],
+    identity=pull(tax.ass.df,identity)[match(mother,pull(tax.ass.df,md5))],
+    blastId=pull(tax.ass.df,blastId)[match(mother,pull(tax.ass.df,md5))]) %>% 
+    select(mother,size,bestId,matchLength,identity,blastId,everything()) %>%
+    arrange(bestId,desc(size)) %>%
+    write_csv(path="results/otu-table-raw-annotated.csv")
