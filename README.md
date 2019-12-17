@@ -133,7 +133,7 @@ This step creates your OTU tables, which are the basis for further analyses.
 ./make-otu-tables.R
 ```
 
-This step creates files named `results/otu-table-raw.csv` (table with md5sums), `results/otu-table-all.csv` (all named taxa, including unassigned), and `results/otu-table-fish.csv` (only reads identified as fishes). The file `results/taxonomy-assignments.tsv` contains all OTU names and their best taxonomic assignment, along with blastn percent identity, match length, and best scoring blastn hit(s). This information is also added to the OTU table in `results/otu-table-raw-annotated.csv` To obtain the DNA sequence of each OTU, search for the md5sum in `results/cleaned-reads.fasta`.
+This step creates files named `results/otu-table-raw.csv` (table with md5sums), `results/otu-table-all.csv` (all named taxa, including unassigned), and `results/otu-table-fish.csv` (only reads identified as fishes). The file `results/taxonomy-assignments.tsv` contains all OTU names and their best taxonomic assignment, along with total OTU size, blastn percent identity, match length, and best scoring blastn hit(s). This information is also added to the OTU table in `results/otu-table-raw-annotated.csv` To obtain the DNA sequence of each OTU, search for the md5sum in `results/cleaned-reads.fasta`.
 
 Optionally you can also run OTU-table post-processing with lulu, which will collapse PCR errors and reduce the number of spurious 'shadow' OTUs. Check results with care as it may also collapse real interspecific variation. This creates a file named `results/otu-table-raw-annotated-lulu.csv`.
 
