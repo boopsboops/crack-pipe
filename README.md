@@ -28,17 +28,23 @@ export PATH=~/Software/swarm/bin:$PATH
 ./prepare.sh
 ```
 
-3. Put your raw R1 and R2 metabarcoding reads (FASTQ format) into the `temp/fastq` directory. You can keep the original file names for these.  
-4. Put your sample barcodes (FASTA format) into the file `temp/fastq/barcodes.fas`. These barcodes should be 10 bp in length, and therefore will contain your 7/8 bp tag, plus two or three bases of your forward PCR primer to anchor the barcode. The FASTA header will contain your sample identification codes, or plate well number, like so:
+3. Put your raw R1 and R2 metabarcoding reads (FASTQ format) into the `temp/user-data` directory. You can keep the original file names for these.  
+
+4. Prepare a spreadsheet (CSV format, named `sample-plates.csv`) with information for each sample. Following the example below, there should be four columns in the spreadsheet: `well` (plate well number of the sample), `sampleID` (a unique identifier for each sample), `oligoFwd` (forward PCR primer in 5'-3' orientation, including barcode tags and Ns), and `oligoRev` (the reverse PCR primer in 5'-3' orientation, including barcode tags and Ns). You can have additional columns describing your samples, but you will need the mandatory four columns, named exactly. Place this file into `temp/user-data`
 
 ```
->A01
-CGGAAACGTC
->A02
-TATCATTGTC
+well,sampleID,oligoFwd,oligoRev
+A01,UC3A,NNNTATCATTGTCGGTAAAACTCGTGCCAGC,NNNTATCATTCATAGTGGGGTATCTAATCCCAGTTTG
+A02,LC2A,NNNNCGGAAACGTCGGTAAAACTCGTGCCAGC,NNCGGAAACCATAGTGGGGTATCTAATCCCAGTTTG
 ```
 
-5. Put your custom reference library (FASTA format) into the `temp/reference-library/custom-references.fasta` file. Your custom reference library should be unaligned sequences containing no Ns, hyphens, or question marks. The FASTA header will contain the tissue identification code separated from the species name by a pipe. Genus and species should be separated by a space. Be sure to remove any trailing whitespace (spaces or tabs) from the ends of the lines. For example:
+Now run the following line to generate the sample barcodes fasta file named `temp/samples/barcodes.fas`, which is used later.
+
+```
+./get-barcodes.R
+```
+
+5. Put your custom reference library (FASTA format, named `custom-references.fasta`) into the `temp/user-data` directory. Your custom reference library should be unaligned sequences containing no Ns, hyphens, or question marks. The FASTA header will contain the tissue identification code separated from the species name by a pipe. Genus and species should be separated by a space. Be sure to remove any trailing whitespace (spaces or tabs) from the ends of the lines. For example:
 
 ```
 >RC1587|Tinca tinca
@@ -48,10 +54,10 @@ CACCGCGGTTAAACGAGAGGCCCTAGTTGATATTACTACGGCGTAAAGGGT
 
 ## Step 3: Merge your reads
 
-The first processing step is to merge the paired-end reads. The -f and -r arguments are the locations of your raw R1 and R2 reads, respectively. The -t argument is the number of processor cores on your machine (if in doubt, set to 4).
+The first processing step is to merge the paired-end reads. The -f and -r arguments are the locations of your raw R1 and R2 reads, respectively. The -t argument is the number of processing threads on your machine (if in doubt, set to 4).
 
 ```
-./merge-reads.sh -t 8 -f temp/fastq/your-reads.R1.fastq.gz -r temp/fastq/your-reads.R2.fastq.gz
+./merge-reads.sh -t 4 -f temp/user-data/R1.fastq.gz -r temp/user-data/R2.fastq.gz
 ```
 
 This step creates a file named `temp/merged/merged.fastq.gz`.
@@ -70,10 +76,10 @@ This step creates a file named `temp/reorientated/reorientated.fastq.gz`.
 
 ## Step 5: Demultiplex your reads
 
-Now the reads can be demultiplexed by the sample barcodes you put into `temp/fastq/barcodes.fas`. The -f and -r arguments are the forward PCR primer and the reverse complement of the reverse PCR primer, respectively. Change as appropriate for your data. The -t argument is the number of processor cores on your machine (if in doubt, set to 4). The reads are also trimmed of PCR primers and barcodes in this step.
+Now the reads can be demultiplexed by the sample barcodes. The -f and -r arguments are the forward PCR primer (excluding barcode tags) and the reverse complement of the reverse PCR primer (excluding barcode tags), respectively. Change as appropriate for your data. The -t argument is the number of threads on your machine (if in doubt, set to 4). The -e argument is the stringency of the barcode matching, with -e 0 requiring a exact match (change to 0.1 to allow one mismatch, or 0.2 to allow two, ... etc). The reads are also trimmed of PCR primers and barcodes in this step.
 
 ```
-./demultiplex.sh -t 8 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
+./demultiplex.sh -e 0 -t 4 -f GTCGGTAAAACTCGTGCCAGC -r CAAACTGGGATTAGATACCCCACTATG
 ```
 
 This step creates files named `temp/demultiplexed/*.fastq.gz` and `temp/trimmed/*.fastq.gz`.
@@ -92,10 +98,10 @@ This step creates files named `temp/filtered/*.fasta` and `temp/dereplicated/*.f
 
 ## Step 7: Cluster your reads
 
-This step performs several functions. First it merges all the samples and dereplicates again globally. Next, it clusters the sequences into biologically useful groups using the Swarm algorithm. This collapses most of the Illumina sequencing and PCR errors. Next, it removes sequences that could be chimaeric, i.e. partial sequences grafted together due to PCR or library prep errors. Next, it performs a quality filter where low abundance clusters are discarded as probaly spurious. Here, the -u argument is set as the proportion of total reads, so sequence clusters with fewer reads than this proportion will be discarded. The value below is an arbitrary starting point, so change as appropriate for your data. The -t argument is the number of processor cores of your machine (if in doubt, set to 4).
+This step performs several functions. First it merges all the samples and dereplicates again globally. Next, it clusters the sequences into biologically useful groups (OTUs) using the Swarm algorithm. This collapses most of the Illumina sequencing and PCR errors. Next, it removes sequences that could be chimaeric, i.e. partial sequences grafted together due to PCR or library prep errors. Next, it performs a quality filter where low abundance OTUs are discarded as probaly spurious. Here, the -u argument is set as the proportion of total reads, so sequence clusters with fewer reads than this proportion will be discarded. The value below is an arbitrary starting point, so change as appropriate for your data (number of reads discarded is reported). The -t argument is the number of processor threads of your machine (if in doubt, set to 4).
 
 ```
-./cluster.sh -t 8 -u 0.000005
+./cluster.sh -t 4 -u 0.000005
 ```
 
 This step creates files named `results/cleaned.reads.fasta` and `temp/clustered/swarm.clusters.tsv`.
@@ -103,7 +109,7 @@ This step creates files named `results/cleaned.reads.fasta` and `temp/clustered/
 
 ## Step 8: Assemble your reference library
 
-This step takes your custom reference library at `temp/reference-library/custom-references.fasta` and annotates it with taxonomic information from [FishBase](https://www.fishbase.se/search.php). This is a more sensible and predictable taxonomy than from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy).
+This step takes your custom reference library at `temp/user-data/custom-references.fasta` and annotates it with taxonomic information from [FishBase](https://www.fishbase.se/search.php). This is a more sensible and predictable taxonomy than from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy).
 
 ```
 ./annotate-taxonomy.R
@@ -116,10 +122,10 @@ Step creates the file `temp/reference-library/custom-references-annotated.fasta`
 
 This step assigns taxonomy to your cleaned reads using the custom reference library and an annotated NCBI REFSEQ mitochondrial DNA database of 4,571 sequences. 
 
-The -t argument is the number of processor cores of your machine (if in doubt, set to 4). The -a argument is the approximate or average length of the fragment minus primers (in this case about 170 bp for the MiFish 12S fragment). The -p argument is the proportion of the average length you are willing to accept as a valid reference sequence. Here we set to 0.7 which is 119 bp. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data. The function also runs a blast analysis.
+The -t argument is the number of processor threads of your machine (if in doubt, set to 4). The -a argument is the approximate or average length of the fragment minus primers (in this case about 170 bp for the MiFish 12S fragment). The -p argument is the proportion of the average length you are willing to accept as a valid reference sequence. Here we set to 0.7 which is 119 bp. The -c argument is the bootstrap value for reporting an identification (range 0-1). Lower values will give more precise but less accurate identifications, and vice versa for higher values (e.g. family level instead of species level). Experiment to see how this value affects the identifications using your data. The function also runs a blast search and generates sequence similarity values (identity).
 
 ```
-./assign-taxonomy.sh -t 8 -a 170 -p 0.7 -c 0.7
+./assign-taxonomy.sh -t 4 -a 170 -p 0.7 -c 0.7
 ```
 
 This step creates files named `results/reference-library.fasta` and `results/taxonomy-assignments.tsv`.
@@ -135,7 +141,7 @@ This step creates your OTU tables, which are the basis for further analyses.
 
 This step creates files named `results/otu-table-raw.csv` (table with md5sums), `results/otu-table-all.csv` (all named taxa, including unassigned), and `results/otu-table-fish.csv` (only reads identified as fishes). The file `results/taxonomy-assignments.tsv` contains all OTU names and their best taxonomic assignment, along with total OTU size, blastn percent identity, match length, and best scoring blastn hit(s). This information is also added to the OTU table in `results/otu-table-raw-annotated.csv` To obtain the DNA sequence of each OTU, search for the md5sum in `results/cleaned-reads.fasta`.
 
-Optionally you can also run OTU-table post-processing with lulu, which will collapse PCR errors and reduce the number of spurious 'shadow' OTUs. Check results with care as it may also collapse real interspecific variation. This creates a file named `results/otu-table-raw-annotated-lulu.csv`.
+Optionally you can also run OTU-table post-processing with lulu, which will further collapse PCR errors and reduce the number of spurious 'shadow' OTUs. Check results with care as it may also collapse real interspecific variation. This creates a file named `results/otu-table-raw-annotated-lulu.csv`.
 
 ```
 ./lulu.sh
@@ -147,7 +153,7 @@ Optionally you can also run OTU-table post-processing with lulu, which will coll
 This step generates stats for the numbers of reads at each stage. The -f argument is the path to your raw R1 reads file. This enables you to track your losses of reads at each step.
 
 ```
-./generate-stats.sh -f temp/fastq/your-reads.R1.fastq.gz
+./generate-stats.sh -f temp/user-data/R1.fastq.gz
 ```
 
 
@@ -155,9 +161,10 @@ This step generates stats for the numbers of reads at each stage. The -f argumen
 
 If you need to run any parts of the pipeline again, you can do so from any point, but it is safest to first delete and recreate any previously populated directories from that step, and those after. You may also want to empty the temp directories to save some disk space (if you're sure you don't want any of the intermediate files any longer).
 
-These commands will not remove the `temp/fastq` or `temp/reference-library` directories with your original files, or your `results`):
+These commands will not remove the `temp/user-data` directory with your original files, or your `results`):
 
 ```
+rm -r temp/samples #step 2
 rm -r temp/merged #step 3
 rm -r temp/trash #step 4
 rm -r temp/reorientated #step 4
