@@ -8,6 +8,7 @@ in
 f) FWD=${OPTARG};;
 r) REVCOMP=${OPTARG};;
 t) THREADS=${OPTARG};;
+e) ERR=${OPTARG};;
 esac
 done
 
@@ -27,7 +28,7 @@ FILES="$(ls temp/reorientated/reorientated.fastq.gz.split/*.fastq.gz | sed -e 's
 
 # run demultiplex loop
 for i in $FILES; do 
-cutadapt --no-indels --error-rate 0 --overlap 10 --action=none -g file:temp/fastq/barcodes.fas -o temp/demultiplexed/"$i"/{name}.fastq.gz --discard-untrimmed temp/reorientated/reorientated.fastq.gz.split/"$i".fastq.gz &
+cutadapt --no-indels --error-rate "$ERR" --overlap 10 --action=none -g file:temp/samples/barcodes.fas -o temp/demultiplexed/"$i"/{name}.fastq.gz --discard-untrimmed temp/reorientated/reorientated.fastq.gz.split/"$i".fastq.gz &
 done; wait
 
 # now cat all of the files back into the same files - 
