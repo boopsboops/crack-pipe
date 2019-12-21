@@ -39,11 +39,24 @@ keeps.names <- str_replace_all(names(keeps),";size=[0-9]*","")
 samples.kept <- samples.merged %>% filter(mother %in% keeps.names) 
 
 # check numbers are the same
-print("read numbers are the same?")
-samples.kept %>% pull(sum) %>% sum == sum(as.numeric(str_replace_all(names(keeps),".*;size=","")))
+#print("read numbers are the same?")
+#samples.kept %>% pull(sum) %>% sum == sum(as.numeric(str_replace_all(names(keeps),".*;size=","")))
+
+# read in samples df to check for missing samples with zero reads
+samples.df <- suppressMessages(suppressWarnings(read_csv("temp/samples/sample-plates.csv")))
+
+# make an id
+samples.df %<>% mutate(sample=paste(well,sampleID,sep="."))
+
+# get the ones that are not present in the otus
+samples.missing <- samples.df %>% filter(!sample %in% unique(pull(samples.kept,sample))) %>% select(sample) %>% mutate(mother=NA,sum=0)
+
+# add them
+samples.kept %<>% bind_rows(samples.missing)
 
 # create an otu table and write out
 samples.kept %>% spread(key=sample,value=sum,fill=0) %>%
+    filter(!is.na(mother)) %>%
     write_csv(path="results/otu-table-raw.csv")
 
 # read in taxonomy assignment
@@ -97,18 +110,19 @@ assigned.all <- samples.kept %>% mutate(assignment=pull(tax.ass.df,bestId)[match
 # collapse by ID
 assigned.all %>%
     group_by(sample,assignment) %>%
-    summarise(sum=sum(sum)) %>%
+    summarise(sum=sum(sum)) %>% 
     ungroup() %>% 
     spread(key=sample,value=sum,fill=0) %>% 
     write_csv(path="results/otu-table-all.csv")
 
 # fish only, and collapse by all
 assigned.all %>%
-    filter(isFish==TRUE) %>%
+    mutate(assignment=if_else(isFish==TRUE,assignment,"NA"),sum=if_else(isFish==TRUE,sum,0)) %>%
     group_by(sample,assignment) %>%
     summarise(sum=sum(sum)) %>%
     ungroup() %>% 
     spread(key=sample,value=sum,fill=0) %>% 
+    filter(assignment!="NA") %>%
     write_csv(path="results/otu-table-fish.csv")
 
 # get total number fish reads
@@ -127,4 +141,5 @@ samples.kept %>% spread(key=sample,value=sum,fill=0) %>%
     blastId=pull(tax.ass.df,blastId)[match(mother,pull(tax.ass.df,md5))]) %>% 
     select(mother,size,bestId,matchLength,identity,blastId,everything()) %>%
     arrange(bestId,desc(size)) %>%
+    filter(!is.na(mother)) %>%
     write_csv(path="results/otu-table-raw-annotated.csv")
