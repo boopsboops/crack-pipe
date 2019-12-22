@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
 # load libs
-library("ape")
-library("tidyverse")
-library("magrittr")
+suppressMessages(library("ape"))
+suppressMessages(library("tidyverse"))
+suppressMessages(library("magrittr"))
 
 # load spreadsheet of samples
 samples.df <- suppressMessages(suppressWarnings(read_csv("temp/user-data/sample-plates.csv")))
