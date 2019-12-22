@@ -30,7 +30,7 @@ export PATH=~/Software/swarm/bin:$PATH
 
 3. Put your raw R1 and R2 metabarcoding reads (FASTQ format) into the `temp/user-data` directory. You can keep the original file names for these.  
 
-4. Prepare a spreadsheet (CSV format, named `sample-plates.csv`) with information for each sample. Following the example below, there should be four columns in the spreadsheet: `well` (plate well number of the sample), `sampleID` (a unique identifier for each sample), `oligoFwd` (forward PCR primer in 5'-3' orientation, including barcode tags and Ns), and `oligoRev` (the reverse PCR primer in 5'-3' orientation, including barcode tags and Ns). You can have additional columns describing your samples, but you will need the mandatory four columns, named exactly. Place this file into `temp/user-data`
+4. Prepare a spreadsheet (CSV format, named `sample-plates.csv`) with information for each sample. Following the example below, there should be four columns in the spreadsheet: `well` (plate well number of the sample), `sampleID` (a unique identifier for each sample), `oligoFwd` (forward PCR primer in 5'-3' orientation, including barcode tags and Ns), and `oligoRev` (the reverse PCR primer in 5'-3' orientation, including barcode tags and Ns). You can have additional columns describing your samples, but you will need the mandatory four columns, named exactly. Place this file into `temp/user-data`.
 
 ```
 well,sampleID,oligoFwd,oligoRev
@@ -161,7 +161,7 @@ This step generates stats for the numbers of reads at each stage. The -f argumen
 
 If you need to run any parts of the pipeline again, you can do so from any point, but it is safest to first delete and recreate any previously populated directories from that step, and those after. You may also want to empty the temp directories to save some disk space (if you're sure you don't want any of the intermediate files any longer).
 
-These commands will not remove the `temp/user-data` directory with your original files, or your `results`):
+These commands will not remove the `temp/user-data` directory with your original files, or your `results`:
 
 ```
 rm -r temp/samples #step 2
