@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # set params #
-while getopts t:f:r: option
+while getopts t:f:r:e: option
 do
 case "${option}"
 in
