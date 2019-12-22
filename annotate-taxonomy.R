@@ -6,7 +6,7 @@ suppressMessages(library("parallel"))
 suppressMessages(library("magrittr"))
 
 # read in refs and remove duplicates
-custom.refs <- read.FASTA(file="temp/reference-library/custom-references.fasta")
+custom.refs <- read.FASTA(file="temp/user-data/custom-references.fasta")
 custom.refs <- custom.refs[!duplicated(str_split_fixed(names(custom.refs),"\\|",2)[,1])]
 
 # make df of names

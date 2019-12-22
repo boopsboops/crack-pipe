@@ -43,7 +43,7 @@ samples.kept <- samples.merged %>% filter(mother %in% keeps.names)
 #samples.kept %>% pull(sum) %>% sum == sum(as.numeric(str_replace_all(names(keeps),".*;size=","")))
 
 # read in samples df to check for missing samples with zero reads
-samples.df <- suppressMessages(suppressWarnings(read_csv("temp/samples/sample-plates.csv")))
+samples.df <- suppressMessages(suppressWarnings(read_csv("temp/user-data/sample-plates.csv")))
 
 # make an id
 samples.df %<>% mutate(sample=paste(well,sampleID,sep="."))

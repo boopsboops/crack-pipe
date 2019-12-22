@@ -6,7 +6,7 @@ library("tidyverse")
 library("magrittr")
 
 # load spreadsheet of samples
-samples.df <- suppressMessages(suppressWarnings(read_csv("temp/samples/sample-plates.csv")))
+samples.df <- suppressMessages(suppressWarnings(read_csv("temp/user-data/sample-plates.csv")))
 
 # trim barcodes to 10 bp
 samples.df %<>% mutate(barcodesFwd=str_replace_all(oligoFwd,"N",""), 
