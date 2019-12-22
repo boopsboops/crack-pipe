@@ -15,8 +15,8 @@ done
 # split the FASTQ
 # create tmp folders
 #THREADS=8
-for i in `seq -w 1 "$THREADS"`; do
-  mkdir temp/demultiplexed/reorientated.part_0"$i"
+for i in `seq -w 1 100 | head -n "$THREADS"`; do
+  mkdir temp/demultiplexed/reorientated.part_"$i"
 done
 
 # split the files
